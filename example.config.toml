@@ -1,0 +1,3 @@
+# Get the AppId here: https://developers.wargaming.net/applications/
+# If you don't have an app created yet, you will need to do so since the data is all from there.
+AppId = ""

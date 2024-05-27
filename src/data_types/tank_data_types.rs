@@ -5,7 +5,6 @@ use strum::EnumIter;
 #[derive(Serialize, Deserialize)]
 pub struct TankData {
     pub status: String,
-    pub meta: Meta,
     #[serde(rename = "data")]
     pub tanks: HashMap<String, Tank>,
 }
