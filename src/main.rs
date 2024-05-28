@@ -1,4 +1,4 @@
-use crate::gui::app::App;
+use crate::gui::wotb_app::WotbApp;
 
 mod data_types;
 mod gui;
@@ -16,6 +16,6 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "Wot Blitz FreeXP Calc.",
         options,
-        Box::new(|_| Box::<App>::default()),
+        Box::new(|_| Box::<WotbApp>::default()),
     )
 }

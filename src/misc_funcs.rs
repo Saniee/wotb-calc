@@ -17,6 +17,7 @@ fn parse_config() -> toml::map::Map<std::string::String, toml::Value> {
     }
 }
 
+#[allow(dead_code)]
 pub fn update_data() -> (DataInfo, HashMap<String, Tank>) {
     let tank_data_path = std::path::Path::new("./tank_data.json");
     let data_info_path = std::path::Path::new("./data_info.json");
