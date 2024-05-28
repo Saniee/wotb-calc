@@ -8,7 +8,18 @@ use crate::data_types::tank_data_types::{Nation, Tank, TankType};
 // ! The main feature.
 pub fn calculate_xp() {}
 
-pub fn tank_selection() {}
+pub fn tank_selection(tanks: (&mut Option<Tank>, &mut Option<Tank>), selection: Tank) {
+    let (first_tank, second_tank) = tanks;
+
+    if first_tank.is_none() {
+        *first_tank = Some(selection);
+    } else if second_tank.is_none() {
+        *second_tank = Some(selection);
+    } else {
+        *first_tank = Some(selection);
+        *second_tank = None;
+    }
+}
 
 pub fn search_database(
     filters: (String, Option<Nation>, Option<TankType>, bool),

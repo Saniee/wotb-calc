@@ -55,15 +55,20 @@ pub fn filters(
     });
 }
 
-pub fn found_results(ui: &mut Ui, found_results: &mut Vec<Tank>) {
+pub fn found_results(
+    ui: &mut Ui,
+    found_results: &mut Vec<Tank>,
+    tanks: (&mut Option<Tank>, &mut Option<Tank>),
+) {
     egui::ScrollArea::vertical()
         .auto_shrink(false)
         .max_height(200.0)
         .show(ui, |ui| {
+            let (first_tank, second_tank) = tanks;
             if !found_results.is_empty() {
                 for tank in found_results {
                     if ui.button(tank.name.to_string()).clicked() {
-                        tank_selection()
+                        tank_selection((first_tank, second_tank), tank.clone())
                     }
                 }
             } else {

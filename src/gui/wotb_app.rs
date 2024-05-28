@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use chrono::DateTime;
+use egui::RichText;
 
 use crate::{
     data_types::{
@@ -91,7 +92,23 @@ impl eframe::App for WotbApp {
                     &mut self.ignore_case,
                 );
                 ui.add_space(15.0);
-                found_results(ui, &mut self.search_result);
+                found_results(
+                    ui,
+                    &mut self.search_result,
+                    (&mut self.first_tank, &mut self.second_tank),
+                );
+                ui.add_space(20.0);
+                if self.first_tank.is_some() && self.second_tank.is_some() {
+                    ui.label(
+                        RichText::new(format!(
+                            "Selected {} and {}!",
+                            self.first_tank.clone().unwrap().name,
+                            self.second_tank.clone().unwrap().name
+                        ))
+                        .size(15.0)
+                        .color(egui::Color32::from_rgb(0, 125, 255)),
+                    );
+                }
             })
         });
     }
