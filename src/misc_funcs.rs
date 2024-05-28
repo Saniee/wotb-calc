@@ -7,6 +7,8 @@ use crate::data_types::{
     tank_data_types::{Tank, TankData},
 };
 
+use reqwest::blocking::Client;
+
 fn parse_config() -> toml::map::Map<std::string::String, toml::Value> {
     let path = std::path::Path::new("./config.toml");
     if path.exists() {
@@ -22,8 +24,8 @@ pub fn update_data() -> (DataInfo, HashMap<String, Tank>) {
     let data_info_path = std::path::Path::new("./data_info.json");
 
     if tank_data_path.exists() && data_info_path.exists() {
-        let _ = trash::delete(tank_data_path);
-        let _ = trash::delete(data_info_path);
+        let _ = fs::remove_file(tank_data_path);
+        let _ = fs::remove_file(data_info_path);
         read_data()
     } else {
         read_data()
@@ -48,7 +50,7 @@ pub fn read_data() -> (DataInfo, HashMap<String, Tank>) {
     } else {
         let config = parse_config();
 
-        let client = reqwest::blocking::Client::new();
+        let client = Client::new();
         let data_info_target = format!(
             "https://api.wotblitz.eu/wotb/encyclopedia/info/?application_id={}",
             config["AppId"].as_str().unwrap()
