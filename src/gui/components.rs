@@ -1,4 +1,3 @@
-// TODO: To be made.
 #![allow(dead_code)]
 
 use std::collections::HashMap;
@@ -7,6 +6,7 @@ use egui::Ui;
 use strum::IntoEnumIterator;
 
 use crate::data_types::tank_data_types::{Nation, Tank, TankType};
+use crate::pathfinding::ResearchPath;
 
 use super::main_funcs::{search_database, tank_selection};
 
@@ -61,6 +61,7 @@ pub fn found_results(
     tanks: (&mut Option<Tank>, &mut Option<Tank>),
 ) {
     egui::ScrollArea::vertical()
+        .id_source("search_results")
         .auto_shrink(false)
         .max_height(200.0)
         .show(ui, |ui| {
@@ -79,4 +80,71 @@ pub fn found_results(
                 );
             }
         });
+}
+
+pub fn research_result(ui: &mut Ui, path: &Option<ResearchPath>) {
+    let path = match path {
+        None => return,
+        Some(p) => p,
+    };
+
+    if path.steps.is_empty() {
+        ui.label(
+            egui::RichText::new("Same tank selected  - no research needed.")
+                .color(egui::Color32::from_rgb(180, 180, 0)),
+        );
+        return;
+    }
+
+    ui.label(
+        egui::RichText::new(format!("Total XP needed: {}", format_xp(path.total_xp)))
+            .size(16.0)
+            .strong()
+            .color(egui::Color32::from_rgb(255, 200, 0)),
+    );
+    ui.add_space(6.0);
+
+    egui::ScrollArea::vertical()
+        .id_source("research_result")
+        .max_height(300.0)
+        .auto_shrink([false, true])
+        .show(ui, |ui| {
+            for step in &path.steps {
+                ui.group(|ui| {
+                    ui.label(
+                        egui::RichText::new(format!("On: {}", step.tank_name))
+                            .strong()
+                            .color(egui::Color32::from_rgb(100, 200, 255)),
+                    );
+                    if step.modules_to_research.is_empty() {
+                        ui.label("  (gate module already unlocked)");
+                    } else {
+                        for m in &step.modules_to_research {
+                            ui.label(format!("  * Research {}  - {} XP", m.module_name, format_xp(m.xp_cost)));
+                        }
+                    }
+                    ui.label(
+                        egui::RichText::new(format!(
+                            "  -> Unlock {}  - {} XP",
+                            step.next_tank_name,
+                            format_xp(step.next_tank_xp)
+                        ))
+                        .color(egui::Color32::from_rgb(0, 220, 100)),
+                    );
+                });
+                ui.add_space(4.0);
+            }
+        });
+}
+
+fn format_xp(xp: i64) -> String {
+    if xp >= 1_000_000 {
+        format!("{:.1}M", xp as f64 / 1_000_000.0)
+    } else if xp >= 1_000 {
+        let s = xp.to_string();
+        let (h, t) = s.split_at(s.len() - 3);
+        if h.is_empty() { format!("{}", t) } else { format!("{},{}", h, t) }
+    } else {
+        xp.to_string()
+    }
 }

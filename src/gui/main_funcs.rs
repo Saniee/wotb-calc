@@ -3,10 +3,15 @@
 use std::collections::HashMap;
 
 use crate::data_types::tank_data_types::{Nation, Tank, TankType};
+use crate::pathfinding::{find_research_path, ResearchPath};
 
-// TODO: Make this shit work.
-// ! The main feature.
-pub fn calculate_xp() {}
+pub fn calculate_xp(
+    tanks: &HashMap<String, Tank>,
+    first_tank: &Tank,
+    second_tank: &Tank,
+) -> Option<ResearchPath> {
+    find_research_path(tanks, first_tank.tank_id, second_tank.tank_id)
+}
 
 pub fn tank_selection(tanks: (&mut Option<Tank>, &mut Option<Tank>), selection: Tank) {
     let (first_tank, second_tank) = tanks;

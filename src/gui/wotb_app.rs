@@ -9,11 +9,13 @@ use crate::{
         tank_data_types::{Nation, Tank, TankType},
     },
     misc_funcs::update_data,
+    pathfinding::ResearchPath,
 };
 
 use crate::misc_funcs::read_data;
 
-use super::components::{filters, found_results, search};
+use super::components::{filters, found_results, research_result, search};
+use super::main_funcs::calculate_xp;
 
 #[allow(unused)]
 pub struct WotbApp {
@@ -26,6 +28,7 @@ pub struct WotbApp {
     tanks: HashMap<String, Tank>,
     first_tank: Option<Tank>,
     second_tank: Option<Tank>,
+    research_path: Option<ResearchPath>,
 }
 
 impl Default for WotbApp {
@@ -42,6 +45,7 @@ impl Default for WotbApp {
             tanks,
             first_tank: Default::default(),
             second_tank: Default::default(),
+            research_path: None,
         }
     }
 }
@@ -65,6 +69,7 @@ impl eframe::App for WotbApp {
                     let (data_info, tanks) = update_data();
                     self.data_info = data_info;
                     self.tanks = tanks;
+                    self.research_path = None;
                 }
                 ui.add_space(12.5);
                 ui.label(
@@ -92,23 +97,43 @@ impl eframe::App for WotbApp {
                     &mut self.ignore_case,
                 );
                 ui.add_space(15.0);
+                let prev_first = self.first_tank.as_ref().map(|t| t.tank_id);
+                let prev_second = self.second_tank.as_ref().map(|t| t.tank_id);
                 found_results(
                     ui,
                     &mut self.search_result,
                     (&mut self.first_tank, &mut self.second_tank),
                 );
-                ui.add_space(20.0);
-                if self.first_tank.is_some() && self.second_tank.is_some() {
-                    ui.label(
-                        RichText::new(format!(
-                            "Selected {} and {}!",
-                            self.first_tank.clone().unwrap().name,
-                            self.second_tank.clone().unwrap().name
-                        ))
-                        .size(15.0)
-                        .color(egui::Color32::from_rgb(0, 125, 255)),
-                    );
+                let new_first = self.first_tank.as_ref().map(|t| t.tank_id);
+                let new_second = self.second_tank.as_ref().map(|t| t.tank_id);
+                if prev_first != new_first || prev_second != new_second {
+                    self.research_path = None;
                 }
+
+                ui.add_space(10.0);
+                match (&self.first_tank, &self.second_tank) {
+                    (Some(a), Some(b)) => {
+                        ui.label(
+                            RichText::new(format!("Selected: {} -> {}", a.name, b.name))
+                                .size(14.0)
+                                .color(egui::Color32::from_rgb(0, 125, 255)),
+                        );
+                        if ui.button("Calculate Path").clicked() {
+                            self.research_path =
+                                calculate_xp(&self.tanks, a, b);
+                        }
+                    }
+                    (Some(a), None) => {
+                        ui.label(
+                            RichText::new(format!("From: {}  - pick a second tank", a.name))
+                                .size(14.0)
+                                .color(egui::Color32::from_rgb(200, 200, 0)),
+                        );
+                    }
+                    _ => {}
+                }
+                ui.add_space(10.0);
+                research_result(ui, &self.research_path);
             })
         });
     }
